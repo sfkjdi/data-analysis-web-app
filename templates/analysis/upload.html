@@ -1,0 +1,43 @@
+{% extends 'analysis/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">📂 CSVファイルをアップロード</h4>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="file" name="csv_file" accept=".csv" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">分析する</button>
+                </form>
+            </div>
+        </div>
+
+        {% if files %}
+        <div class="card shadow mt-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">📋 アップロード履歴</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for file in files %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'dashboard' file.pk %}">{{ file.name }}</a>
+                    <span class="text-muted small">{{ file.uploaded_at|date:"Y/m/d H:i" }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

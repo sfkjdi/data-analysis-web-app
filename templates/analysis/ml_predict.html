@@ -1,0 +1,68 @@
+{% extends 'analysis/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <h4 class="mb-0">🤖 回帰分析 - {{ file.name }}</h4>
+                <a href="/dashboard/{{ file.pk }}/" class="btn btn-outline-light btn-sm">← 戻る</a>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">予測したい列（目的変数）</label>
+                        <select name="target" class="form-select">
+                            {% for col in columns %}
+                            <option value="{{ col.column_name }}">{{ col.column_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">使用する列（説明変数）</label>
+                        {% for col in columns %}
+                        <div class="form-check">
+                            <input type="checkbox" name="features" value="{{ col.column_name }}" class="form-check-input" id="col_{{ forloop.counter }}">
+                            <label class="form-check-label" for="col_{{ forloop.counter }}">{{ col.column_name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">分析する</button>
+                </form>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">📈 分析結果</h5>
+            </div>
+            <div class="card-body">
+                <p>目的変数：<strong>{{ result.target }}</strong></p>
+                <p>説明変数：<strong>{{ result.features|join:", " }}</strong></p>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>R²スコア（決定係数）</th>
+                        <td><strong>{{ result.r2 }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>MSE（平均二乗誤差）</th>
+                        <td><strong>{{ result.mse }}</strong></td>
+                    </tr>
+                </table>
+                <div class="alert {% if result.r2 >= 0.7 %}alert-success{% elif result.r2 >= 0.4 %}alert-warning{% else %}alert-danger{% endif %}">
+                    {% if result.r2 >= 0.7 %}
+                    ✅ R²スコアが高く、モデルの精度は良好です！
+                    {% elif result.r2 >= 0.4 %}
+                    ⚠️ R²スコアは中程度です。説明変数を見直してみましょう。
+                    {% else %}
+                    ❌ R²スコアが低いです。別の説明変数を試してみましょう。
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

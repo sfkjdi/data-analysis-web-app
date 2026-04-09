@@ -1,0 +1,103 @@
+{% extends 'analysis/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <h4 class="mb-0">📊 {{ file.name }}</h4>
+               <a href="/" class="btn btn-outline-light btn-sm">← 戻る</a>
+<a href="/ml/{{ file.pk }}/" class="btn btn-success btn-sm">🤖 回帰分析</a>
+            </div>
+            <div class="card-body">
+                <p>行数：<strong>{{ file.row_count }}</strong>　列数：<strong>{{ file.column_count }}</strong></p>
+                <div class="mb-2">
+                    <label class="me-2 fw-bold">グラフの種類：</label>
+                    <select id="chartType" class="form-select d-inline-block w-auto" onchange="updateAllCharts()">
+                        <option value="bar">棒グラフ</option>
+                        <option value="line">折れ線グラフ</option>
+                        <option value="radar">レーダーチャート</option>
+                        <option value="polarArea">極座標グラフ</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for col in columns %}
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0">{{ col.column_name }}</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm mb-3">
+                    <tr><th>平均</th><td>{{ col.mean|floatformat:2 }}</td></tr>
+                    <tr><th>中央値</th><td>{{ col.median|floatformat:2 }}</td></tr>
+                    <tr><th>標準偏差</th><td>{{ col.std|floatformat:2 }}</td></tr>
+                    <tr><th>最小値</th><td>{{ col.min_value|floatformat:2 }}</td></tr>
+                    <tr><th>最大値</th><td>{{ col.max_value|floatformat:2 }}</td></tr>
+                    <tr><th>欠損値数</th><td>{{ col.null_count }}</td></tr>
+                </table>
+                <canvas id="chart_{{ forloop.counter }}" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+const chartData = [
+    {% for col in columns %}
+    {
+        id: 'chart_{{ forloop.counter }}',
+        label: '{{ col.column_name }}',
+        data: [{{ col.min_value }}, {{ col.mean }}, {{ col.median }}, {{ col.max_value }}]
+    },
+    {% endfor %}
+];
+
+const labels = ['最小値', '平均', '中央値', '最大値'];
+const colors = [
+    'rgba(54, 162, 235, 0.7)',
+    'rgba(255, 99, 132, 0.7)',
+    'rgba(75, 192, 192, 0.7)',
+    'rgba(255, 206, 86, 0.7)'
+];
+
+let charts = [];
+
+function createCharts(type) {
+    charts.forEach(c => c.destroy());
+    charts = [];
+    chartData.forEach(item => {
+        const ctx = document.getElementById(item.id);
+        const chart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: item.label,
+                    data: item.data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(c => c.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+        charts.push(chart);
+    });
+}
+
+function updateAllCharts() {
+    const type = document.getElementById('chartType').value;
+    createCharts(type);
+}
+
+createCharts('bar');
+</script>
+{% endblock %}
