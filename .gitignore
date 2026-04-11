@@ -16,3 +16,4 @@ env/
 
 # AWS
 *.pem
+kaggle_data/
