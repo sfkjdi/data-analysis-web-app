@@ -8,25 +8,20 @@
                 <h4 class="mb-0">🔗 Kaggleからデータを取得</h4>
             </div>
             <div class="card-body">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
                 <p class="text-muted">KaggleのデータセットIDを入力してください<br>
                 例：<code>titanic</code> → <code>heptapod/titanic</code></p>
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">データセットID</label>
-                        <input type="text" name="dataset" class="form-control" placeholder="例: heptapod/titanic">
+                        <input type="text" name="dataset" class="form-control" placeholder="例: heptapod/titanic" required>
                     </div>
                     <button type="submit" class="btn btn-dark w-100">取得して分析する</button>
                 </form>
             </div>
         </div>
         <div class="mt-3 text-center">
-            <a href="/" class="text-muted">← 戻る</a>
+            <a href="{% url 'upload' %}" class="text-muted">← 戻る</a>
         </div>
     </div>
 </div>

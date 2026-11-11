@@ -6,13 +6,13 @@
         <div class="card shadow mb-4">
             <div class="card-header gradient-header d-flex justify-content-between">
                 <h4 class="mb-0">🔥 相関分析 - {{ file.name }}</h4>
-                <a href="/dashboard/{{ file.pk }}/" class="btn-nav">← 戻る</a>
+                <a href="{% url 'dashboard' file.pk %}" class="btn-nav">← 戻る</a>
             </div>
             <div class="card-body text-center">
                 {% if img %}
                 <img src="data:image/png;base64,{{ img }}" class="img-fluid rounded" style="max-width:100%;">
                 {% else %}
-                <p class="text-muted">数値データが見つかりませんでした</p>
+                <p class="text-muted">相関を計算できる数値の列が2つ以上ありません</p>
                 {% endif %}
             </div>
         </div>

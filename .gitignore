@@ -17,3 +17,6 @@ env/
 # AWS
 *.pem
 kaggle_data/
+
+# アップロードされたCSV
+media/

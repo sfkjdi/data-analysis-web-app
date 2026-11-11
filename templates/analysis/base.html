@@ -100,14 +100,17 @@
 <body>
     <nav class="navbar navbar-dark mb-4">
         <div class="container">
-            <a class="navbar-brand" href="/">📊 DataAnalytics</a>
+            <a class="navbar-brand" href="{% url 'upload' %}">📊 DataAnalytics</a>
             <div>
-                <a class="btn-nav" href="/">📂 CSVアップロード</a>
-                <a class="btn-nav" href="/kaggle/">🔗 Kaggle取得</a>
+                <a class="btn-nav" href="{% url 'upload' %}">📂 CSVアップロード</a>
+                <a class="btn-nav" href="{% url 'kaggle_import' %}">🔗 Kaggle取得</a>
             </div>
         </div>
     </nav>
     <div class="container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
         {% block content %}{% endblock %}
     </div>
 </body>
