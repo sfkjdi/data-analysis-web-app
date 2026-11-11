@@ -4,18 +4,18 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card shadow mb-4">
-            <div class="card-header bg-dark text-white d-flex justify-content-between">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">🤖 回帰分析 - {{ file.name }}</h4>
-                <a href="/dashboard/{{ file.pk }}/" class="btn btn-outline-light btn-sm">← 戻る</a>
+                <a href="{% url 'dashboard' file.pk %}" class="btn btn-outline-light btn-sm">← 戻る</a>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-bold">予測したい列（目的変数）</label>
-                        <select name="target" class="form-select">
+                        <label class="form-label fw-bold" for="target">予測したい列（目的変数）</label>
+                        <select name="target" id="target" class="form-select">
                             {% for col in columns %}
-                            <option value="{{ col.column_name }}">{{ col.column_name }}</option>
+                            <option value="{{ col.column_name }}" {% if col.column_name == selected_target %}selected{% endif %}>{{ col.column_name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -23,10 +23,19 @@
                         <label class="form-label fw-bold">使用する列（説明変数）</label>
                         {% for col in columns %}
                         <div class="form-check">
-                            <input type="checkbox" name="features" value="{{ col.column_name }}" class="form-check-input" id="col_{{ forloop.counter }}">
-                            <label class="form-check-label" for="col_{{ forloop.counter }}">{{ col.column_name }}</label>
+                            <input type="checkbox" name="features" value="{{ col.column_name }}" class="form-check-input" id="col_{{ forloop.counter }}" {% if col.column_name in selected_features %}checked{% endif %}>
+                            <label class="form-check-label" for="col_{{ forloop.counter }}">{{ col.column_name }}（欠損 {{ col.null_count }}件）</label>
                         </div>
                         {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="missing_strategy">説明変数の欠損値の扱い</label>
+                        <select name="missing_strategy" id="missing_strategy" class="form-select">
+                            {% for value, label in strategies %}
+                            <option value="{{ value }}" {% if value == selected_strategy %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">補完に使う平均値・中央値は学習データだけから計算します。目的変数が欠損している行は常に除きます。</div>
                     </div>
                     <button type="submit" class="btn btn-dark w-100">分析する</button>
                 </form>
@@ -41,6 +50,7 @@
             <div class="card-body">
                 <p>目的変数：<strong>{{ result.target }}</strong></p>
                 <p>説明変数：<strong>{{ result.features|join:", " }}</strong></p>
+                <p>欠損値の扱い：<strong>{{ result.strategy_label }}</strong>（学習 {{ result.train_rows }}行 / テスト {{ result.test_rows }}行）</p>
                 <table class="table table-bordered">
                     <tr>
                         <th>R²スコア（決定係数）</th>

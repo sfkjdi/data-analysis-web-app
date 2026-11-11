@@ -4,10 +4,13 @@
 <div class="row">
     <div class="col-12 mb-4">
         <div class="card shadow">
-            <div class="card-header bg-dark text-white d-flex justify-content-between">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">📊 {{ file.name }}</h4>
-               <a href="/" class="btn btn-outline-light btn-sm">← 戻る</a>
-<a href="/ml/{{ file.pk }}/" class="btn btn-success btn-sm">🤖 回帰分析</a>
+                <div>
+                    <a href="{% url 'upload' %}" class="btn btn-outline-light btn-sm">← 戻る</a>
+                    <a href="{% url 'correlation' file.pk %}" class="btn btn-warning btn-sm">🔥 相関分析</a>
+                    <a href="{% url 'ml_predict' file.pk %}" class="btn btn-success btn-sm">🤖 回帰分析</a>
+                </div>
             </div>
             <div class="card-body">
                 <p>行数：<strong>{{ file.row_count }}</strong>　列数：<strong>{{ file.column_count }}</strong></p>
@@ -32,30 +35,28 @@
             </div>
             <div class="card-body">
                 <table class="table table-sm mb-3">
-                    <tr><th>平均</th><td>{{ col.mean|floatformat:2 }}</td></tr>
-                    <tr><th>中央値</th><td>{{ col.median|floatformat:2 }}</td></tr>
-                    <tr><th>標準偏差</th><td>{{ col.std|floatformat:2 }}</td></tr>
-                    <tr><th>最小値</th><td>{{ col.min_value|floatformat:2 }}</td></tr>
-                    <tr><th>最大値</th><td>{{ col.max_value|floatformat:2 }}</td></tr>
+                    <tr><th>平均</th><td>{{ col.mean|floatformat:2|default:"-" }}</td></tr>
+                    <tr><th>中央値</th><td>{{ col.median|floatformat:2|default:"-" }}</td></tr>
+                    <tr><th>標準偏差</th><td>{{ col.std|floatformat:2|default:"-" }}</td></tr>
+                    <tr><th>最小値</th><td>{{ col.min_value|floatformat:2|default:"-" }}</td></tr>
+                    <tr><th>最大値</th><td>{{ col.max_value|floatformat:2|default:"-" }}</td></tr>
                     <tr><th>欠損値数</th><td>{{ col.null_count }}</td></tr>
                 </table>
                 <canvas id="chart_{{ forloop.counter }}" height="150"></canvas>
             </div>
         </div>
     </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">数値の列がないため、統計量を計算できませんでした</p>
+    </div>
     {% endfor %}
 </div>
 
+{{ chart_data|json_script:"chart-data" }}
 <script>
-const chartData = [
-    {% for col in columns %}
-    {
-        id: 'chart_{{ forloop.counter }}',
-        label: '{{ col.column_name }}',
-        data: [{{ col.min_value }}, {{ col.mean }}, {{ col.median }}, {{ col.max_value }}]
-    },
-    {% endfor %}
-];
+// 列名の記号や欠損値(null)でJSが壊れないよう、json_script で受け取る
+const chartData = JSON.parse(document.getElementById('chart-data').textContent);
 
 const labels = ['最小値', '平均', '中央値', '最大値'];
 const colors = [

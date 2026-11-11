@@ -8,15 +8,11 @@
                 <h4 class="mb-0">📂 CSVファイルをアップロード</h4>
             </div>
             <div class="card-body">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <input type="file" name="csv_file" accept=".csv" class="form-control">
+                        <div class="form-text">文字コードは UTF-8 / Shift-JIS に対応しています</div>
                     </div>
                     <button type="submit" class="btn btn-dark w-100">分析する</button>
                 </form>
